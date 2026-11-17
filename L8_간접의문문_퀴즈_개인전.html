@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson 8 간접의문문 퀴즈 (개인전)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f6f4ef; --card:#ffffff; --ink:#1f2430; --muted:#6b7180; --line:#e4e0d6;
+    --accent:#2f5bd3; --accent-soft:#e8eefc; --ok:#1f8a4c; --ok-soft:#e3f4ea;
+    --bad:#c8402f; --bad-soft:#fbe7e3; --hl:#fff1b8;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:980px;margin:0 auto;padding:24px 20px 48px}
+  header{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  .brand .eyebrow{font-size:13px;font-weight:700;letter-spacing:.08em;color:var(--accent);text-transform:uppercase}
+  .brand h1{margin:2px 0 0;font-size:26px;font-weight:900}
+  .teams{display:flex;gap:10px}
+  .team{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:6px 10px;display:flex;align-items:center;gap:8px}
+  .team .name{font-weight:700;font-size:14px}
+  .team .pts{font-size:22px;font-weight:900;min-width:28px;text-align:center;font-variant-numeric:tabular-nums}
+  .team button{border:1px solid var(--line);background:#faf9f6;border-radius:8px;width:28px;height:28px;font-size:16px;cursor:pointer;color:var(--ink)}
+  .team button:hover{background:var(--accent-soft)}
+  .progress{margin:20px 0 8px;display:flex;gap:4px}
+  .dot{flex:1;height:8px;border-radius:4px;background:var(--line);cursor:pointer;border:0;padding:0}
+  .dot.done-ok{background:var(--ok)} .dot.done-bad{background:var(--bad)} .dot.cur{outline:2px solid var(--ink);outline-offset:1px}
+  .meta{display:flex;justify-content:space-between;color:var(--muted);font-size:14px;font-weight:500}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:32px;margin-top:14px;box-shadow:0 1px 0 rgba(0,0,0,.02)}
+  .round{display:inline-block;background:var(--accent-soft);color:var(--accent);font-weight:700;font-size:14px;padding:4px 12px;border-radius:999px}
+  .q{font-size:26px;font-weight:700;line-height:1.5;margin:16px 0 6px}
+  .sub{font-size:17px;color:var(--muted);margin:0 0 18px}
+  .sent{font-family:Georgia,"Times New Roman",serif;font-size:30px;line-height:1.5;background:#faf9f6;border:1px dashed var(--line);border-radius:14px;padding:18px 22px;margin:8px 0 22px}
+  .blank{display:inline-block;min-width:110px;border-bottom:3px solid var(--ink);text-align:center}
+  .choices{display:grid;gap:12px}
+  .choices.two{grid-template-columns:1fr 1fr}
+  .choice{display:flex;align-items:center;gap:14px;text-align:left;width:100%;font:inherit;font-size:21px;padding:16px 18px;border:2px solid var(--line);border-radius:14px;background:#fff;cursor:pointer;color:var(--ink);transition:border-color .15s,background .15s}
+  .choice:hover:not(:disabled){border-color:var(--accent)}
+  .choice .key{flex:none;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent);font-weight:900;font-size:16px}
+  .choice.sel{border-color:var(--accent);background:var(--accent-soft)}
+  .choice.ok{border-color:var(--ok);background:var(--ok-soft)}
+  .choice.bad{border-color:var(--bad);background:var(--bad-soft)}
+  .choice:disabled{cursor:default}
+  .choice.ox{justify-content:center;font-size:56px;font-weight:900;padding:22px}
+  .en{font-family:Georgia,"Times New Roman",serif}
+  .tokens{display:flex;flex-wrap:wrap;gap:10px;font-family:Georgia,"Times New Roman",serif;font-size:30px;line-height:1.4;background:#faf9f6;border:1px dashed var(--line);border-radius:14px;padding:18px 22px;margin:8px 0 6px}
+  .tok{font:inherit;border:2px solid transparent;border-radius:10px;background:transparent;padding:2px 8px;cursor:pointer;color:var(--ink)}
+  .tok:hover:not(:disabled){background:var(--hl)}
+  .tok.sel{border-color:var(--accent);background:var(--accent-soft)}
+  .tok.ok{border-color:var(--ok);background:var(--ok-soft)}
+  .tok.bad{border-color:var(--bad);background:var(--bad-soft);text-decoration:line-through}
+  .tok:disabled{cursor:default}
+  .answerline{min-height:66px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;font-family:Georgia,"Times New Roman",serif;font-size:28px;border-bottom:3px solid var(--ink);padding:8px 4px;margin:10px 0 18px}
+  .answerline .ph{font-family:"Noto Sans KR",sans-serif;font-size:16px;color:var(--muted)}
+  .bank{display:flex;flex-wrap:wrap;gap:10px}
+  .chip{font-family:Georgia,"Times New Roman",serif;font-size:24px;padding:10px 16px;border:2px solid var(--line);border-radius:12px;background:#fff;cursor:pointer;color:var(--ink)}
+  .chip:hover:not(:disabled){border-color:var(--accent)}
+  .chip.used{opacity:.25}
+  .chip.inline{font-size:26px;padding:4px 12px;background:var(--accent-soft);border-color:var(--accent)}
+  .actions{display:flex;justify-content:space-between;align-items:center;margin-top:26px;gap:12px;flex-wrap:wrap}
+  .btn{font:inherit;font-weight:700;font-size:18px;padding:13px 26px;border-radius:12px;border:2px solid var(--ink);background:var(--ink);color:#fff;cursor:pointer}
+  .btn.ghost{background:#fff;color:var(--ink)}
+  .btn:disabled{opacity:.35;cursor:default}
+  .feedback{margin-top:22px;border-radius:14px;padding:18px 22px;display:none}
+  .feedback.show{display:block}
+  .feedback.ok{background:var(--ok-soft);border:1px solid #bfe3cc}
+  .feedback.bad{background:var(--bad-soft);border:1px solid #f1c6bd}
+  .feedback .verdict{font-weight:900;font-size:20px;margin-bottom:6px}
+  .feedback.ok .verdict{color:var(--ok)} .feedback.bad .verdict{color:var(--bad)}
+  .feedback .ans{font-size:18px;margin-bottom:6px}
+  .feedback .exp{font-size:17px;line-height:1.7;color:#333}
+  .hint{font-size:14px;color:var(--muted)}
+  .rounds{display:flex;flex-wrap:wrap;gap:6px;margin-top:18px}
+  .rbtn{font:inherit;font-size:13px;font-weight:700;padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--muted);cursor:pointer}
+  .rbtn.on{background:var(--accent);border-color:var(--accent);color:#fff}
+  .picks{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;padding:6px 0}
+  .picks.list{flex-direction:column;align-items:stretch;gap:10px}
+  .pk{font-family:Georgia,"Times New Roman",serif;font-size:28px;padding:12px 26px;border:3px solid var(--line);border-radius:999px;background:#fff;cursor:pointer;color:var(--ink);transition:border-color .15s,background .15s}
+  .picks.list .pk{font-size:22px;border-radius:14px;text-align:left;padding:14px 20px}
+  .pk:hover:not(:disabled){border-color:var(--accent)}
+  .pk.sel{border-color:var(--accent);background:var(--accent-soft)}
+  .pk.ok{border-color:var(--ok);background:var(--ok-soft)}
+  .pk.bad{border-color:var(--bad);background:var(--bad-soft);text-decoration:line-through}
+  .pk.miss{border-color:var(--ok);border-style:dashed}
+  .pk:disabled{cursor:default}
+  .player{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 14px}
+  .pname{font-weight:700;font-size:15px}
+  .pscore{font-weight:900;font-size:20px;color:var(--ok);font-variant-numeric:tabular-nums}
+  .pscore small{font-size:14px;color:var(--muted);font-weight:500}
+  .start{padding:6px 0}
+  .start form{display:flex;gap:12px;flex-wrap:wrap;margin:18px 0 8px}
+  .nm{flex:1;min-width:220px;font:inherit;font-size:20px;padding:13px 16px;border:2px solid var(--line);border-radius:12px;outline:none}
+  .nm:focus{border-color:var(--accent)}
+  .rules{margin:18px 0 0;padding-left:20px;color:#444;font-size:16px;line-height:1.9}
+  .certificate{border:2px solid var(--accent);border-radius:18px;padding:22px;background:linear-gradient(180deg,#f3f6ff,#fff)}
+  .certificate .who{font-size:22px;font-weight:900}
+  .certificate .big small{font-size:28px;margin-left:4px}
+  .certificate .sub2{font-size:16px;color:#444}
+  .certificate .msg{margin-top:10px;font-size:18px;font-weight:700;color:var(--accent)}
+  .wrong{margin-top:20px}
+  .wlist{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:8px}
+  .wq{font:inherit;font-weight:700;padding:6px 14px;border-radius:999px;border:1px solid #f1c6bd;background:var(--bad-soft);color:var(--bad);cursor:pointer}
+  span.dot{display:block;cursor:default}
+  .write{display:flex;flex-wrap:wrap;align-items:center;gap:10px;font-family:Georgia,"Times New Roman",serif;font-size:26px;background:#faf9f6;border:1px dashed var(--line);border-radius:14px;padding:18px 22px;margin:8px 0 8px}
+  .write .pre{white-space:nowrap}
+  .wi{flex:1;min-width:240px;font:inherit;font-size:24px;padding:10px 14px;border:2px solid var(--line);border-radius:10px;background:#fff;outline:none;color:var(--ink)}
+  .wi:focus{border-color:var(--accent)}
+  .wi.ok{border-color:var(--ok);background:var(--ok-soft)} .wi.bad{border-color:var(--bad);background:var(--bad-soft)}
+  .end{text-align:center;padding:20px 0}
+  .end .big{font-size:72px;font-weight:900;margin:10px 0}
+  .end table{margin:20px auto 0;border-collapse:collapse;font-size:16px;text-align:left}
+  .end td,.end th{padding:8px 14px;border-bottom:1px solid var(--line)}
+  .end th{color:var(--muted);font-weight:500}
+  .summary{background:#faf9f6;border:1px solid var(--line);border-radius:14px;padding:18px 22px;margin-top:24px;text-align:left;font-size:16px;line-height:1.8}
+  .summary b{color:var(--accent)}
+  @media (max-width:640px){
+    .card{padding:22px} .q{font-size:21px} .sent,.tokens{font-size:23px} .choice{font-size:18px}
+    .choices.two{grid-template-columns:1fr} .choice.ox{font-size:44px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <div class="eyebrow">Grammar · Lesson 8</div>
+      <h1>간접의문문 퀴즈</h1>
+    </div>
+    <div class="player" id="player"></div>
+  </header>
+
+  <div class="progress" id="progress"></div>
+  <div class="meta"><span id="roundName"></span><span id="counter"></span></div>
+
+  <div class="card" id="card"></div>
+</div>
+
+<script>
+const ROUNDS = {
+  1:"Round 1 · 개념 O/X",
+  2:"Round 2 · 빈칸 채우기",
+  3:"Round 3 · 바른 어순 고르기",
+  4:"Round 4 · 틀린 곳 찾기",
+  5:"Round 5 · 문장 배열",
+  6:"Round 6 · 영작하기"
+};
+
+const QUESTIONS = [
+  // Round 1
+  {r:1,type:"ox",q:"간접의문문은 ‘의문사 + 주어 + 동사’의 순서로 쓴다.",a:"O",
+   exp:"맞아요. 직접의문문(Where does he live?)의 ‘의문사 + 동사 + 주어’ 순서를 간접의문문에서는 <b>의문사 + 주어 + 동사</b>(where he lives)로 바꿔요."},
+
+  // Round 2: blanks
+  {r:2,type:"mc",q:"빈칸에 알맞은 것을 고르세요.",sent:"I wonder ____ called me yesterday.",choices:["why","who","where"],a:1,en:true,
+   exp:"‘누가’ 전화했는지 궁금한 것이므로 <b>who</b>. 의문사가 주어인 경우에는 <b>의문사 + 동사</b> 순서 그대로 써요. (who called me)"},
+  {r:2,type:"mc",q:"우리말에 맞게 빈칸에 알맞은 것을 고르세요.",sub:"역이 어디 있는지 말해 줄 수 있나요?",sent:"Can you tell me ____ the station is?",choices:["what","where","if","who"],a:1,en:true,
+   exp:"‘어디’ 있는지 묻고 있으므로 <b>where</b>. → Can you tell me <b>where the station is</b>?"},
+  {r:2,type:"mc",q:"우리말에 맞게 빈칸에 알맞은 것을 고르세요.",sub:"영화가 언제 시작하는지 말해 주세요.",sent:"Please tell me ____ the movie starts.",choices:["what","who","when","if"],a:2,en:true,
+   exp:"‘언제’ 시작하는지 묻고 있으므로 <b>when</b>. 주어가 3인칭 단수(the movie)라서 동사는 starts가 돼요."},
+
+  // Round 3: correct order
+  {r:3,type:"mc",q:"어법상 <b>올바른</b> 문장을 고르세요.",
+   choices:["I wonder what is she doing.","I wonder what she is doing.","I wonder what does she doing.","I wonder she is doing what."],a:1,en:true,
+   exp:"간접의문문은 <b>의문사 + 주어 + 동사</b> 순서! → I wonder <b>what she is doing</b>."},
+  {r:3,type:"mc",q:"빈칸에 알맞은 것을 고르세요.",sent:"Do you know where ____?",choices:["does he live","he lives","he live","lives he"],a:1,en:true,
+   exp:"간접의문문에서는 does를 쓰지 않고, 주어(he)에 맞춰 동사를 <b>lives</b>로 바꿔요. → Do you know <b>where he lives</b>?"},
+
+  // Round 4: find the error (chunks)
+  {r:4,type:"err",q:"틀린 부분을 찾아 눌러 보세요.",tokens:["I","don’t","know","where","is the museum","."],a:4,fix:"the museum is",
+   exp:"간접의문문은 주어 + 동사 순서예요. → I don’t know where <b>the museum is</b>."},
+  {r:4,type:"err",q:"틀린 부분을 찾아 눌러 보세요.",tokens:["Can","you","tell","me","when","does the store open","?"],a:5,fix:"the store opens",
+   exp:"간접의문문에서는 does를 빼고 동사에 -s를 붙여요. → Can you tell me when <b>the store opens</b>?"},
+  {r:4,type:"err",q:"틀린 부분을 찾아 눌러 보세요.",tokens:["I’m","not","sure","that","he","will","come","."],a:3,fix:"if / whether",
+   exp:"의문사가 없고 Yes/No로 답하는 질문(Will he come?)을 간접의문문으로 만들 때는 <b>if</b>나 <b>whether</b>를 써요. → I’m not sure <b>whether</b> he will come."},
+
+  // Round 5: ordering
+  {r:5,type:"order",q:"단어를 바르게 배열하여 문장을 완성하세요.",sub:"나는 박물관이 어디에 있는지 모른다.",
+   bank:["the museum","is","know","I","where","don’t"],a:["I","don’t","know","where","the museum","is"],
+   exp:"I don’t know + where(의문사) + the museum(주어) + is(동사)."},
+  {r:5,type:"order",q:"단어를 바르게 배열하여 문장을 완성하세요.",sub:"너는 그것이 무엇을 의미하는지 아니?",
+   bank:["it","know","Do","what","you","means"],a:["Do","you","know","what","it","means"],
+   exp:"Do you know + what(의문사) + it(주어) + means(동사)?"},
+  {r:5,type:"order",q:"단어를 바르게 배열하여 문장을 완성하세요.",sub:"나는 이 다리가 언제 지어졌는지 궁금하다.",
+   bank:["was built","I","this bridge","when","wonder"],a:["I","wonder","when","this bridge","was built"],
+   exp:"<b>수동태</b>도 같은 규칙! When was this bridge built? → I wonder when <b>this bridge</b>(주어) <b>was built</b>(동사)."},
+
+  // Round 6: writing
+  {r:6,type:"write",q:"주어진 질문을 간접의문문으로 바꿔 문장을 완성하세요.",sub:"Where does she live?",
+   prefix:"I don’t know",suffix:".",a:["where she lives"],
+   exp:"does를 없애고 동사에 -s를 붙여요. → I don’t know <b>where she lives</b>."},
+  {r:6,type:"write",q:"주어진 질문을 간접의문문으로 바꿔 문장을 완성하세요.",sub:"What time is it?",
+   prefix:"Can you tell me",suffix:"?",a:["what time it is"],
+   exp:"‘what time’이 하나의 의문사 덩어리예요. 그 뒤에 주어(it) + 동사(is). → Can you tell me <b>what time it is</b>?"},
+  {r:6,type:"write",q:"주어진 질문을 간접의문문으로 바꿔 문장을 완성하세요.",sub:"Who broke the window?",
+   prefix:"I want to know",suffix:".",a:["who broke the window"],
+   exp:"의문사(who)가 <b>주어</b>인 질문은 순서를 바꾸지 않고 그대로 써요. → I want to know <b>who broke the window</b>."},
+  {r:6,type:"write",q:"주어진 질문을 간접의문문으로 바꿔 문장을 완성하세요.",sub:"Is he at home?",
+   prefix:"I wonder",suffix:".",a:["if he is at home","whether he is at home","whether or not he is at home"],
+   exp:"의문사가 없는 Yes/No 질문이므로 <b>if</b>나 <b>whether</b>를 써요. → I wonder <b>if(whether) he is at home</b>."},
+  {r:6,type:"write",q:"주어진 질문을 간접의문문으로 바꿔 문장을 완성하세요.",sub:"When was this book written?",
+   prefix:"Please tell me",suffix:".",a:["when this book was written"],
+   exp:"<b>수동태</b> 질문도 주어 + 동사 순서로! → Please tell me when <b>this book</b> <b>was written</b>."},
+  {r:6,type:"write",q:"우리말과 같은 뜻이 되도록 영작하세요.",sub:"나는 그가 왜 늦었는지 모른다. <span class='hint'>(late)</span>",
+   prefix:"",suffix:"",a:["I don't know why he was late","I do not know why he was late","I don't know why he came late"],
+   exp:"I don’t know + why + he(주어) + was(동사) + late. → <b>I don’t know why he was late.</b>"},
+  {r:6,type:"write",q:"우리말과 같은 뜻이 되도록 영작하세요.",sub:"그녀는 나에게 배가 고픈지 물었다. <span class='hint'>(ask, hungry)</span>",
+   prefix:"",suffix:"",a:["She asked me if I was hungry","She asked me whether I was hungry","She asked me whether or not I was hungry"],
+   exp:"Yes/No 질문(Are you hungry?)이므로 <b>if / whether</b>를 쓰고, 과거(asked)에 맞춰 was를 써요. → <b>She asked me if(whether) I was hungry.</b>"},
+  {r:6,type:"write",q:"우리말과 같은 뜻이 되도록 영작하세요.",sub:"너는 이 사진이 어디에서 찍혔는지 아니? <span class='hint'>(picture, take)</span>",
+   prefix:"",suffix:"",a:["Do you know where this picture was taken","Do you know where this photo was taken"],
+   exp:"<b>수동태</b> 질문 Where was this picture taken? → Do you know where <b>this picture</b> <b>was taken</b>?"}
+];
+
+const LETTERS = ["a","b","c","d","e"];
+let idx = 0;
+const blank = ()=>({sel:null, order:[], picks:[], text:"", checked:false, correct:null});
+let state = QUESTIONS.map(blank);
+let player = "", attempt = 0, startTime = null, endTime = null;
+
+const $ = s => document.querySelector(s);
+
+function esc(t){ return t.replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function renderPlayer(){
+  if(!player){ $("#player").innerHTML=""; return; }
+  const ok=state.filter(x=>x.correct).length, done=state.filter(x=>x.checked).length;
+  $("#player").innerHTML = `<span class="pname">👤 ${esc(player)}</span><span class="pscore">✔ ${ok} <small>/ ${done}</small></span>`;
+}
+function renderProgress(){
+  renderPlayer();
+  if(!player){ $("#progress").innerHTML=""; return; }
+  $("#progress").innerHTML = QUESTIONS.map((_,i)=>{
+    const s=state[i]; let c="dot";
+    if(s.checked) c+= s.correct?" done-ok":" done-bad";
+    if(i===idx) c+=" cur";
+    return `<span class="${c}"></span>`;
+  }).join("");
+}
+
+function sentHTML(s){ return s.replace(/____/g,'<span class="blank">&nbsp;</span>'); }
+
+function render(){
+  renderProgress();
+  if(!player){ renderStart(); return; }
+  if(idx>=QUESTIONS.length){ renderEnd(); return; }
+  const Q=QUESTIONS[idx], S=state[idx];
+  $("#roundName").textContent = ROUNDS[Q.r];
+  $("#counter").textContent = `${idx+1} / ${QUESTIONS.length}`;
+  let body = `<span class="round">Q${idx+1}</span><div class="q">${Q.q}</div>`;
+  if(Q.sub) body += `<p class="sub">${Q.sub}</p>`;
+  if(Q.sent) body += `<div class="sent">${sentHTML(Q.sent)}</div>`;
+
+  if(Q.type==="ox"){
+    body += `<div class="choices two">` + ["O","X"].map(v=>{
+      let c="choice ox";
+      if(S.checked){ if(v===Q.a) c+=" ok"; else if(v===S.sel) c+=" bad"; }
+      else if(S.sel===v) c+=" sel";
+      return `<button class="${c}" data-v="${v}" ${S.checked?"disabled":""}>${v}</button>`;
+    }).join("") + `</div>`;
+  }
+  if(Q.type==="mc"){
+    body += `<div class="choices ${Q.two?'two':''}">` + Q.choices.map((ch,i)=>{
+      let c="choice";
+      if(S.checked){ if(i===Q.a) c+=" ok"; else if(i===S.sel) c+=" bad"; }
+      else if(S.sel===i) c+=" sel";
+      return `<button class="${c}" data-v="${i}" ${S.checked?"disabled":""}><span class="key">${LETTERS[i]}</span><span class="${Q.en?'en':''}">${sentHTML(ch)}</span></button>`;
+    }).join("") + `</div>`;
+  }
+  if(Q.type==="pick"){
+    body += `<div class="picks ${Q.layout==='list'?'list':''}">` + Q.items.map((t,i)=>{
+      let c="pk"; const on=S.picks.includes(i), want=Q.a.includes(i);
+      if(S.checked){ if(on&&want) c+=" ok"; else if(on) c+=" bad"; else if(want) c+=" miss"; }
+      else if(on) c+=" sel";
+      return `<button class="${c}" data-p="${i}" ${S.checked?"disabled":""}>${Q.layout==="list"?"①②③④⑤⑥⑦⑧"[i]+" ":""}${t}</button>`;
+    }).join("") + `</div><div class="hint" style="text-align:center">해당하는 것을 모두 눌러 표시하세요. (다시 누르면 취소)</div>`;
+  }
+  if(Q.type==="err"){
+    body += `<div class="tokens">` + Q.tokens.map((t,i)=>{
+      let c="tok";
+      if(S.checked){ if(i===Q.a) c+=" bad"; if(i===S.sel && i!==Q.a) c+=" sel"; }
+      else if(S.sel===i) c+=" sel";
+      return `<button class="${c}" data-v="${i}" ${S.checked?"disabled":""}>${t}</button>`;
+    }).join("") + `</div><div class="hint">단어를 눌러 선택하세요.</div>`;
+  }
+  if(Q.type==="write"){
+    body += `<div class="write">${Q.prefix?`<span class="pre">${Q.prefix}</span>`:""}<input id="wi" class="wi ${S.checked?(S.correct?'ok':'bad'):''}" value="${esc(S.text||"")}" ${S.checked?"disabled":""} autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${Q.prefix?'이어서 쓰세요':'영어 문장을 쓰세요'}">${Q.suffix?`<span class="pre">${Q.suffix}</span>`:""}</div>
+      <div class="hint">${Q.prefix?"앞부분은 이미 쓰여 있어요. 뒷부분만 입력하세요.":"문장 전체를 입력하세요. 마침표(.)나 물음표(?)는 빼도 괜찮아요."}</div>`;
+  }
+  if(Q.type==="order"){
+    const line = S.order.length
+      ? S.order.map((bi,k)=>`<button class="chip inline" data-k="${k}" ${S.checked?"disabled":""}>${Q.bank[bi]}</button>`).join("")
+      : `<span class="ph">아래 단어를 순서대로 누르세요. (올린 단어를 누르면 다시 내려갑니다)</span>`;
+    body += `<div class="answerline">${line}</div><div class="bank">` + Q.bank.map((w,i)=>
+      `<button class="chip ${S.order.includes(i)?'used':''}" data-b="${i}" ${S.order.includes(i)||S.checked?"disabled":""}>${w}</button>`
+    ).join("") + `</div>`;
+  }
+
+  // feedback
+  let fb="";
+  if(S.checked){
+    let ans="";
+    if(Q.type==="ox") ans=`정답: <b>${Q.a}</b>`;
+    if(Q.type==="mc") ans=`정답: <b>${LETTERS[Q.a]}) <span class="${Q.en?'en':''}">${Q.choices[Q.a].replace(/____/g,"___")}</span></b>`;
+    if(Q.type==="err") ans=`틀린 곳: <b class="en">${Q.tokens[Q.a]}</b> → <b class="en">${Q.fix}</b>`;
+    if(Q.type==="order") ans=`정답: <b class="en">${Q.a.join(" ")}${/^(Do|Can|Did|Is|Are)$/.test(Q.a[0])?"?":"."}</b>`;
+    if(Q.type==="write") ans=`내 답: <span class="en">${esc((Q.prefix?Q.prefix+" ":"")+(S.text||""))}</span><br>정답: <b class="en">${Q.a.map(x=>(Q.prefix?Q.prefix+" ":"")+x.replace(/'/g,"’")+(Q.suffix||(/^(Do|Can|Did|Is|Are)\b/.test(x)?"?":"."))).join("  /  ")}</b>`;
+    if(Q.type==="pick") ans=Q.layout==="list" ? `정답: <b>${Q.a.map(i=>"①②③④⑤⑥⑦⑧"[i]).join(", ")}</b> <span class="hint">(위에서 초록색 표시)</span>` : `정답: <b class="en">${Q.a.map(i=>Q.items[i]).join(", ")}</b>`;
+    fb=`<div class="feedback show ${S.correct?'ok':'bad'}">
+      <div class="verdict">${S.correct?"정답이에요!":"아쉬워요!"}</div>
+      <div class="ans">${ans}</div><div class="exp">${Q.exp}</div></div>`;
+  }
+
+  const ready = Q.type==="order" ? S.order.length===Q.a.length : Q.type==="pick" ? S.picks.length>0 : Q.type==="write" ? !!(S.text||"").trim() : S.sel!==null;
+  body += fb + `<div class="actions">
+      <button class="btn ghost" id="prev" ${idx===0?"disabled":""}>← 이전</button>
+      <span>
+        ${S.checked
+          ? `<button class="btn" id="next">${idx===QUESTIONS.length-1?"결과 보기":"다음 →"}</button>`
+          : `<button class="btn" id="check" ${ready?"":"disabled"}>정답 확인</button>`}
+      </span></div>`;
+  $("#card").innerHTML = body;
+
+  // events
+  $("#card").querySelectorAll(".choice,.tok").forEach(b=>b.onclick=()=>{
+    S.sel = Q.type==="ox" ? b.dataset.v : Number(b.dataset.v); render();
+  });
+  $("#card").querySelectorAll(".pk").forEach(b=>b.onclick=()=>{
+    const i=Number(b.dataset.p); S.picks = S.picks.includes(i) ? S.picks.filter(x=>x!==i) : [...S.picks,i]; render();
+  });
+  $("#card").querySelectorAll(".chip[data-b]").forEach(b=>b.onclick=()=>{S.order.push(Number(b.dataset.b));render();});
+  $("#card").querySelectorAll(".chip[data-k]").forEach(b=>b.onclick=()=>{S.order.splice(Number(b.dataset.k),1);render();});
+  const wi=$("#wi");
+  if(wi && !S.checked){
+    wi.oninput=()=>{ S.text=wi.value; const c=$("#check"); if(c) c.disabled=!wi.value.trim(); };
+    wi.onkeydown=e=>{ if(e.key==="Enter" && wi.value.trim()){ e.preventDefault(); check(); } };
+    try{ wi.focus(); wi.setSelectionRange(wi.value.length, wi.value.length); }catch(e){}
+  }
+  const chk=$("#check"); if(chk) chk.onclick=check;
+  const nx=$("#next"); if(nx) nx.onclick=()=>{ idx++; if(idx>=QUESTIONS.length && !endTime) endTime=Date.now(); render(); };
+  const pv=$("#prev"); if(pv) pv.onclick=()=>{idx--;render();};
+}
+
+function check(){
+  const Q=QUESTIONS[idx], S=state[idx];
+  if(Q.type==="order") S.correct = S.order.map(i=>Q.bank[i]).join(" ")===Q.a.join(" ");
+  else if(Q.type==="write"){ const t=norm(S.text||"", Q.prefix); S.correct = Q.a.some(x=>norm(x,"")===t); }
+  else if(Q.type==="pick") S.correct = [...S.picks].sort().join()===[...Q.a].sort().join();
+  else S.correct = S.sel===Q.a;
+  S.checked=true; render();
+}
+
+function renderStart(){
+  $("#roundName").textContent=""; $("#counter").textContent="";
+  $("#card").innerHTML=`<div class="start">
+    <span class="round">개인전</span>
+    <div class="q" style="margin-top:14px">이름(또는 번호)을 입력하고 시작하세요.</div>
+    <form id="sf"><input id="nm" class="nm" maxlength="20" placeholder="예) 2학년 3반 15번 김민지" autocomplete="off">
+    <button class="btn" id="go" type="submit">시작하기 →</button></form>
+    <ul class="rules">
+      <li>문제는 모두 <b>${QUESTIONS.length}개</b>예요.</li>
+      <li>한 문제에 <b>한 번만</b> 답할 수 있어요. ‘정답 확인’을 누르면 답을 바꿀 수 없어요.</li>
+      <li>끝까지 풀면 내 점수와 걸린 시간이 나와요. 결과 화면을 선생님께 보여 주세요.</li>
+    </ul></div>`;
+  const nm=$("#nm"), go=$("#go");
+  const upd=()=>{ go.disabled=!nm.value.trim(); };
+  nm.oninput=upd; upd(); try{ nm.focus(); }catch(e){}
+  $("#sf").onsubmit=e=>{ e.preventDefault(); const v=nm.value.trim(); if(!v) return;
+    player=v; attempt++; state=QUESTIONS.map(blank); idx=0; startTime=Date.now(); endTime=null; render(); };
+}
+
+function norm(t, prefix){
+  t=(t||"").toLowerCase().replace(/[‘’`´]/g,"'").replace(/[“”]/g,'"');
+  const C={"don't":"do not","doesn't":"does not","didn't":"did not","isn't":"is not","aren't":"are not","wasn't":"was not","weren't":"were not","can't":"cannot","won't":"will not","i'm":"i am","it's":"it is","he's":"he is","she's":"she is"};
+  t=t.replace(/[a-z]+'[a-z]+/g,w=>C[w]||w).replace(/can not/g,"cannot");
+  t=t.replace(/[.?!,]/g," ").replace(/\s+/g," ").trim();
+  if(prefix){ const p=norm(prefix,""); if(t.startsWith(p+" ")) t=t.slice(p.length+1); }
+  return t;
+}
+function fmt(ms){ const t=Math.round(ms/1000); return `${Math.floor(t/60)}분 ${String(t%60).padStart(2,"0")}초`; }
+
+function renderEnd(){
+  $("#roundName").textContent="결과";
+  $("#counter").textContent="";
+  const ok=state.filter(s=>s.correct).length, n=QUESTIONS.length, done=state.filter(s=>s.checked).length;
+  const score=Math.round(ok/n*100);
+  const msg = score>=90?"완벽해요! 간접의문문 마스터 🏆": score>=70?"잘했어요! 틀린 문제만 다시 확인해 봐요 👍": score>=50?"절반 넘게 맞혔어요. 정리 내용을 한 번 더 봐요 💪":"괜찮아요! 핵심 정리를 읽고 다시 도전해 봐요 📚";
+  const wrong=QUESTIONS.map((q,i)=>i).filter(i=>!state[i].correct);
+  const rows=Object.entries(ROUNDS).map(([r,name])=>{
+    const qs=QUESTIONS.map((q,i)=>[q,i]).filter(([q])=>q.r==r);
+    if(!qs.length) return "";
+    const c=qs.filter(([,i])=>state[i].correct).length;
+    return `<tr><td>${name.split(" · ")[1]}</td><td>${c} / ${qs.length}</td></tr>`;
+  }).join("");
+  $("#card").innerHTML=`<div class="end">
+    <div class="certificate">
+      <div class="who">${esc(player)}</div>
+      <div class="big">${score}<small>점</small></div>
+      <div class="sub2">${n}문제 중 <b>${ok}개</b> 정답 · 걸린 시간 <b>${startTime&&endTime?fmt(endTime-startTime):"-"}</b>${attempt>1?` · <b>${attempt}번째 도전</b>`:""}</div>
+      ${done<n?`<div class="hint">아직 풀지 않은 문제 ${n-done}개</div>`:""}
+      <div class="msg">${msg}</div>
+    </div>
+    <table><tr><th>영역</th><th>정답</th></tr>${rows}</table>
+    ${wrong.length?`<div class="wrong"><b>틀린 문제 다시 보기</b><div class="wlist">${wrong.map(i=>`<button class="wq" data-i="${i}">Q${i+1}</button>`).join("")}</div></div>`:""}
+    <div class="summary">
+      <b>핵심 정리</b><br>
+      ① 간접의문문 = <b>의문사 + 주어 + 동사</b> (Where does he live? → where he lives)<br>
+      ② do / does / did는 빼고 동사의 시제·수를 맞춰요 (does … live → lives)<br>
+      ③ 의문사가 주어면 순서 그대로 (who broke the window)<br>
+      ④ 의문사가 없는 Yes/No 질문 → <b>if / whether</b> + 주어 + 동사<br>
+      ⑤ 수동태도 같은 규칙: when this bridge <b>was built</b>
+    </div>
+    <div class="actions" style="justify-content:center">
+      <button class="btn" id="reset">처음부터 다시 도전</button>
+    </div></div>`;
+  $("#card").querySelectorAll(".wq").forEach(b=>b.onclick=()=>{idx=Number(b.dataset.i);render();});
+  $("#reset").onclick=()=>{ attempt++; state=QUESTIONS.map(blank); idx=0; startTime=Date.now(); endTime=null; render(); };
+}
+
+document.addEventListener("keydown",e=>{
+  if(e.target && e.target.tagName==="INPUT") return;
+  if(e.key==="ArrowRight" && player && idx<QUESTIONS.length && state[idx].checked){ idx++; if(idx>=QUESTIONS.length && !endTime) endTime=Date.now(); render(); }
+  if(e.key==="ArrowLeft" && player && idx>0){idx--;render();}
+});
+
+render();
+</script>
+</body>
+</html>
